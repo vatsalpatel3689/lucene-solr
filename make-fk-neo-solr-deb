@@ -1,0 +1,99 @@
+#!/bin/bash -e
+
+function die() {
+  echo "Error: $1" >&2
+  exit 1
+}
+
+[ -z "$LOCAL_DIR" ] && die "No base dir specified"
+[ -z "$PACKAGE" ] && die "No package name specified"
+[ ! -d "$LOCAL_DIR" ] && die "$LOCAL_DIR does not exist"
+
+SOLR_VERSION="8.2.0"
+BUILD_VERSION_NUMBER="$SOLR_VERSION-$PIPELINE_LABEL"
+
+# Create base directories for debian packaging
+DEB_DIR="$LOCAL_DIR/deb"
+cd "$LOCAL_DIR"
+[ ! -d "$DEB_DIR" ] && mkdir "$DEB_DIR"
+[ ! -d "$DEB_DIR/usr/share/$PACKAGE/lib" ] && mkdir -p "$DEB_DIR/usr/share/$PACKAGE/lib"
+[ ! -d "$DEB_DIR/usr/share/$PACKAGE/nagios" ] && mkdir -p "$DEB_DIR/usr/share/$PACKAGE/nagios"
+[ ! -d "$DEB_DIR/usr/share/$PACKAGE/offlinemodels/" ] && mkdir -p "$DEB_DIR/usr/share/$PACKAGE/offlinemodels/"
+
+
+# PAAS directories
+[ ! -d "$DEB_DIR/etc/cron.d" ] && mkdir -p "$DEB_DIR/etc/cron.d"
+[ ! -d "$DEB_DIR/etc/default" ] && mkdir -p "$DEB_DIR/etc/default"
+[ ! -d "$DEB_DIR/etc/cosmos-jmx" ] && mkdir -p "$DEB_DIR/etc/cosmos-jmx"
+[ ! -d "$DEB_DIR/etc/rsyslog.d" ] && mkdir -p "$DEB_DIR/etc/rsyslog.d"
+[ ! -d "$DEB_DIR/etc/confd/conf.d" ] && mkdir -p "$DEB_DIR/etc/confd/conf.d"
+[ ! -d "$DEB_DIR/etc/confd/templates" ] && mkdir -p "$DEB_DIR/etc/confd/templates"
+
+# project directory
+PROJECT_DIR="$LOCAL_DIR/package/$PACKAGE"
+
+# copy DEBIAN files
+cp -r ${PROJECT_DIR}/DEBIAN ${DEB_DIR}/DEBIAN
+
+# Build App
+ANT="ant server"
+(cd ${LOCAL_DIR}/solr && ${ANT})
+[ $? -ne 0 ] && die "Build failure"
+
+cd ${LOCAL_DIR}
+TAR_DIR="$LOCAL_DIR/solr-$BUILD_VERSION_NUMBER"
+[ ! -d ${TAR_DIR} ] && mkdir ${TAR_DIR}
+[ ! -d ${TAR_DIR}/contrib/fkltr/lib ] && mkdir -p ${TAR_DIR}/contrib/fkltr/lib
+[ ! -d ${TAR_DIR}/dist ] && mkdir -p ${TAR_DIR}/dist
+cp -Lr ${LOCAL_DIR}/solr/bin ${TAR_DIR}/
+cp -Lr ${LOCAL_DIR}/solr/server ${TAR_DIR}/
+cp ${LOCAL_DIR}/solr/contrib/fkltr/lib/* ${TAR_DIR}/contrib/fkltr/lib/
+cp ${LOCAL_DIR}/solr/dist/solr-fkltr* ${TAR_DIR}/dist/
+cp -r ${LOCAL_DIR}/configsets/* ${TAR_DIR}/server/solr/configsets/
+
+# Create .tgz file with binaries and copy it to corresponding debian directory.
+cd ${TAR_DIR}/..
+tar -czvf ${LOCAL_DIR}/solr-${BUILD_VERSION_NUMBER}.tgz solr-${BUILD_VERSION_NUMBER}/
+cp ${LOCAL_DIR}/solr-${BUILD_VERSION_NUMBER}.tgz ${DEB_DIR}/usr/share/${PACKAGE}/lib/
+
+# Copy nagios files
+cp ${PROJECT_DIR}/usr/share/${PACKAGE}/nagios/* ${DEB_DIR}/usr/share/${PACKAGE}/nagios/
+
+# Copy cron files
+cp ${PROJECT_DIR}/etc/cron.d/* ${DEB_DIR}/etc/cron.d/
+
+# Copy cosmos config files
+cp ${PROJECT_DIR}/etc/default/cosmos-role ${DEB_DIR}/etc/default/
+cp ${PROJECT_DIR}/etc/cosmos-jmx/${PACKAGE}.json ${DEB_DIR}/etc/cosmos-jmx/
+
+# Copy log service config files.
+cp ${PROJECT_DIR}/etc/rsyslog.d/40-${PACKAGE}.conf ${DEB_DIR}/etc/rsyslog.d/
+
+# Copy confd related files
+cp ${PROJECT_DIR}/etc/confd/conf.d/* ${DEB_DIR}/etc/confd/conf.d/
+cp ${PROJECT_DIR}/etc/confd/templates/* ${DEB_DIR}/etc/confd/templates/
+cp ${PROJECT_DIR}/offlinemodels/* ${DEB_DIR}/usr/share/${PACKAGE}/offlinemodels/
+
+
+
+chmod 755 ${DEB_DIR}/usr/share/${PACKAGE}/offlinemodels/
+echo "Updating CONTROL file ..."
+sed -e "s/_PACKAGE_/${PACKAGE}/" -i.bak $DEB_DIR/DEBIAN/control
+sed -e "s/_VERSION_/${BUILD_VERSION_NUMBER}/" -i.bak $DEB_DIR/DEBIAN/control
+rm $DEB_DIR/DEBIAN/control.bak
+
+echo "Updating POSTINST file ..."
+sed -e "s/_PACKAGE_/${PACKAGE}/" -i.bak $DEB_DIR/DEBIAN/postinst
+sed -e "s/_VERSION_/${BUILD_VERSION_NUMBER}/" -i.bak $DEB_DIR/DEBIAN/postinst
+sed -e "s/_USER_/${PACKAGE}/" -i.bak $DEB_DIR/DEBIAN/postinst
+rm $DEB_DIR/DEBIAN/postinst.bak
+
+chmod 755 ${DEB_DIR}/DEBIAN/postinst
+
+VERSION=${BUILD_VERSION_NUMBER}
+ARCH=all
+
+echo "Building deb file ${PACKAGE}_${VERSION}_${ARCH}.deb..."
+dpkg-deb -b ${DEB_DIR} ${PACKAGE}_${VERSION}_${ARCH}.deb
+
+echo "Done."

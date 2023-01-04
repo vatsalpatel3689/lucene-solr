@@ -43,13 +43,18 @@
           pattern="${local-maven2-dir}/[organisation]/[module]/[revision]/[module]-[revision].pom" />
     </filesystem>
 
+    <ibiblio name="fk-art-release" root="https://jfrog.fkinternal.com/artifactory/maven_virtual" m2compatible="true" />
+    <ibiblio name="fk-art-snapshot" root="https://jfrog.fkinternal.com/artifactory/maven_virtual" m2compatible="true" />
+
     <chain name="default" returnFirst="true" checkmodified="true" changingPattern=".*SNAPSHOT">
       <resolver ref="local"/>
       <!-- <resolver ref="local-maven-2" /> -->
-      <resolver ref="main"/>
-      <resolver ref="maven.restlet.com" />
-      <resolver ref="sonatype-releases" />
-      <resolver ref="releases.cloudera.com"/>
+      <resolver ref="fk-art-release"/>
+      <resolver ref="fk-art-snapshot"/>
+      <!-- <resolver ref="main"/> -->
+      <!-- <resolver ref="maven.restlet.com" /> -->
+      <!-- <resolver ref="sonatype-releases" /> -->
+      <!-- <resolver ref="releases.cloudera.com"/> -->
     </chain>
   </resolvers>
 

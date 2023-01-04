@@ -1,0 +1,9 @@
+LSSH='ssh -o CheckHostIP=no -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+count=1
+for ip in `cat ips | tr '\n' ' '`
+do
+		#echo "$j"
+		echo $count : $ip
+		$LSSH $ip "cat /etc/apt/sources.list.d/fk-neo-solr.list |grep fk-neo-solr" 2>/dev/null
+	count=`expr $count + 1`
+done

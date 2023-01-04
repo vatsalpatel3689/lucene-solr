@@ -1,0 +1,15 @@
+ansible-playbook -i <host_file_name> deployment.yml
+
+
+ansible-playbook -i host_banners1_1_PULL deployment.yml
+ansible-playbook -i host_banners1_1_TLOG deployment.yml
+ansible-playbook -i host_banners_en_FKB_PULL deployment.yml
+ansible-playbook -i host_banners_en_FKB_TLOG deployment.yml
+ansible-playbook -i host_banners_en_FKE_PULL deployment.yml
+ansible-playbook -i host_banners_en_FKE_TLOG deployment.yml
+ansible-playbook -i host_banners_non-en_FKB_PULL deployment.yml
+ansible-playbook -i host_banners_non-en_FKB_TLOG deployment.yml
+ansible-playbook -i host_banners_non-en_FKE_PULL deployment.yml
+ansible-playbook -i host_banners_non-en_FKE_TLOG deployment.yml
+ansible-playbook -i host_non-eng_banners_PULL deployment.yml
+ansible-playbook -i host_non-eng_banners_TLOG deployment.yml

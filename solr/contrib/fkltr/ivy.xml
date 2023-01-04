@@ -1,0 +1,70 @@
+<ivy-module version="2.0">
+  <!--
+    todo:fkltr solve it properly.
+    maven install command -
+    mvn install:install-file -Dfile=solr-fkltr-${version.base}-SNAPSHOT.jar -DgroupId=com.flipkart.neo -DartifactId=solr-fkltr -Dversion=${version} -Dpackaging=jar
+
+    maven snapshot deployment command -
+    mvn deploy:deploy-file -Dfile=solr-fkltr-${version.base}-SNAPSHOT.jar -DgroupId=com.flipkart.neo -DartifactId=solr-fkltr -Dversion=${version}-SNAPSHOT -Dpackaging=jar -Durl=http://artifactory.fkinternal.com/artifactory/v1.0/artifacts/libs-snapshots-local
+
+    maven release deployment command -
+    mvn deploy:deploy-file -Dfile=solr-fkltr-${version.base}-SNAPSHOT.jar -DgroupId=com.flipkart.neo -DartifactId=solr-fkltr -Dversion=${version} -Dpackaging=jar -Durl=http://artifactory.fkinternal.com/artifactory/v1.0/artifacts/libs-release-local
+
+    Current release version - 8.2.1-7
+  -->
+
+  <info organisation="com.flipkart.solr" module="fkltr"/>
+  <configurations defaultconfmapping="compile->master;test->master">
+    <conf name="compile" transitive="false"/> <!-- keep unused 'compile' configuration to allow build to succeed -->
+    <conf name="test" transitive="false"/>
+  </configurations>
+
+  <!-- todo:fkltr fix transitive dependency inclusion. -->
+  <dependencies>
+    <dependency org="org.slf4j" name="jcl-over-slf4j" rev="${/org.slf4j/jcl-over-slf4j}" conf="test"/>
+    <dependency org="org.mockito" name="mockito-core" rev="${/org.mockito/mockito-core}" conf="test"/>
+
+    <dependency org="com.flipkart.ads" name="ranking-models" rev="5.5.47" conf="compile"/>
+    <dependency org="com.flipkart.m3" name="varys-models" rev="2.2.1" conf="compile"/>
+    <dependency org="org.antlr" name="antlr-complete" rev="3.5.2" conf="compile"/>
+    <dependency org="com.flipkart.ads" name="ab-client" rev="3.2.2-SNAPSHOT" conf="compile"/>
+    <dependency org="org.jdbi" name="jdbi" rev="2.78" conf="compile"/>
+    <dependency org="mysql" name="mysql-connector-java" rev="8.0.15" conf="compile"/>
+    <dependency org="org.apache.commons" name="commons-collections4" rev="4.3" conf="compile"/>
+    <dependency org="com.flipkart" name="ablibrary" rev="3.4.3" conf="compile"/>
+    <dependency org="joda-time" name="joda-time" rev="2.10.2" conf="compile"/>
+    <dependency org="io.dropwizard.metrics" name="metrics-core" rev="3.2.6" conf="compile"/>
+
+    <dependency org="neo-ingestion-v2" name="client" rev="4.1" conf="compile"/>
+
+    <dependency org="com.flipkart.ads" name="commons" rev="2.5.19-P13N-FEATURES" conf="compile"/>
+    <dependency org="com.flipkart.ads" name="neo-serving-models" rev="1.1.1" conf="compile"/>
+    <dependency org="com.flipkart.ads" name="content-ranking" rev="2.4.19" conf="compile"/>
+    <dependency org="com.flipkart.ads" name="ad-selector-client" rev="1.4.14" conf="compile"/>
+    <dependency org="com.flipkart.cp.usercluster.userservice" name="data-model" rev="3.5.26-WITH-JACKSON" conf="compile"/>
+    <dependency org="fk-ads-demand-aggregator" name="hazelcast" rev="2.7.76" conf="compile"/>
+    <dependency org="org.apache.avro" name="avro" rev="1.7.7" conf="compile"/>
+
+    <dependency org="com.flipkart.kloud.config" name="client-java" rev="1.5.1" conf="compile"/>
+    <dependency org="com.flipkart.kloud.config" name="commons-java" rev="1.5.1" conf="compile"/>
+    <dependency org="org.apache.httpcomponents" name="httpcore-nio" rev="4.3.2" conf="compile"/>
+    <dependency org="org.apache.httpcomponents" name="httpasyncclient" rev="4.0.2" conf="compile"/>
+
+    <dependency org="com.flipkart.kloud.authn" name="client" rev="19.02.14.1" conf="compile"/>
+    <dependency org="com.flipkart.kloud.authn" name="commons" rev="19.02.14.1" conf="compile"/>
+    <dependency org="com.mashape.unirest" name="unirest-java" rev="1.4.5" conf="compile"/>
+    <dependency org="org.json" name="json" rev="20140107" conf="compile"/>
+
+    <dependency org="com.flipkart.security" name="cryptex-client" rev="1.2.2" conf="compile"/>
+    <dependency org="com.flipkart.security" name="cryptex-client-interface" rev="1.0.3" conf="compile"/>
+    <dependency org="com.flipkart.security" name="cryptex-data-models" rev="1.1.1" conf="compile"/>
+
+    <dependency org="org.codehaus.jackson" name="jackson-core-asl" rev="1.9.13" conf="compile"/>
+    <dependency org="org.codehaus.jackson" name="jackson-mapper-asl" rev="1.9.13" conf="compile"/>
+
+    <dependency org="io.github.resilience4j" name="resilience4j-retry" rev="1.7.1" conf="compile"/>
+    <dependency org="io.vavr" name="vavr" rev="0.10.3" conf="compile"/>
+
+    <exclude org="*" ext="*" matcher="regexp" type="${ivy.exclude.types}"/>
+  </dependencies>
+</ivy-module>

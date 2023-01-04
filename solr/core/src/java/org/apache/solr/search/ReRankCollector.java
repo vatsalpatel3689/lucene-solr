@@ -134,11 +134,16 @@ public class ReRankCollector extends TopDocsCollector {
       if(howMany == rescoredDocs.scoreDocs.length) {
         return rescoredDocs; // Just return the rescoredDocs
       } else if(howMany > rescoredDocs.scoreDocs.length) {
-        //We need to return more then we've reRanked, so create the combined page.
-        ScoreDoc[] scoreDocs = new ScoreDoc[howMany];
-        System.arraycopy(mainScoreDocs, 0, scoreDocs, 0, scoreDocs.length); //lay down the initial docs
-        System.arraycopy(rescoredDocs.scoreDocs, 0, scoreDocs, 0, rescoredDocs.scoreDocs.length);//overlay the re-ranked docs.
-        rescoredDocs.scoreDocs = scoreDocs;
+        /*
+        Solr supports the use-case where you can have rescoredDocs < howMany.
+        In this scenario it lays down the initial docs and then overlays with rescored docs.
+
+        We don't want this to happen as original scores and rescored scores are not comparable for us.
+        Moreover, we also support two-level ranking in rescorer where docs are trimmed after first step, so this situation will arise almost every time.
+        Thereby returning only rescoredDocs in this case.
+        Side-effect of this is that we may be returning less docs than actually queried for even if there are enough matching documents,
+        it will happen when matchedDocs > howMany > rescoredDocs.
+         */
         return rescoredDocs;
       } else {
         //We've rescored more then we need to return.
