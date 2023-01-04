@@ -31,6 +31,10 @@ public class ScoreDoc {
   /** Only set by {@link TopDocs#merge}*/
   public int shardIndex;
 
+  // todo:fkltr explore if it can be solved using inheritance and evaluate associated costs (in terms of extra space allocations).
+  /** an object than can be carried for this scoreDoc and represents it in some form */
+  public Object meta;
+
   /** Constructs a ScoreDoc. */
   public ScoreDoc(int doc, float score) {
     this(doc, score, -1);

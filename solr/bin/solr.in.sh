@@ -201,3 +201,6 @@ ENABLE_REMOTE_JMX_OPTS="true"
 # a -Dsolr.environment property below. Valid values are prod, stage, test, dev, with an optional
 # label or color, e.g. -Dsolr.environment=test,label=Functional+test,color=brown
 #SOLR_OPTS="$SOLR_OPTS -Dsolr.environment=prod"
+
+#GZIP_HANDLER_ENABLED=true
+#SOLR_MAX_BOOLEAN_CLAUSES=4096

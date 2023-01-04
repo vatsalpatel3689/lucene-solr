@@ -16,6 +16,19 @@
    specific language governing permissions and limitations
    under the License.    
 -->
+
+<!--
+  Commands to install/deploy new versions -
+
+  mvn install:install-file -Dfile=dist/solr-core-8.2.0-SNAPSHOT.jar -DpomFile=core/custom-pom.xml -DgroupId=org.apache.solr -DartifactId=solr-core -Dversion=${version} -Dpackaging=jar
+
+  mvn deploy:deploy-file -Dfile=dist/solr-core-8.2.0-SNAPSHOT.jar -DpomFile=core/custom-pom.xml -DgroupId=org.apache.solr -DartifactId=solr-core -Dversion=${version} -Dpackaging=jar -Durl=http://artifactory.fkinternal.com/artifactory/v1.0/artifacts/libs-snapshots-local
+
+  mvn deploy:deploy-file -Dfile=dist/solr-core-8.2.0-SNAPSHOT.jar -DpomFile=core/custom-pom.xml -DgroupId=org.apache.solr -DartifactId=solr-core -Dversion=${version} -Dpackaging=jar -Durl=http://artifactory.fkinternal.com/artifactory/v1.0/artifacts/libs-release-local
+
+  Current release version - 8.2.0-FQ-OPT
+-->
+
 <ivy-module version="2.0"  xmlns:maven="http://ant.apache.org/ivy/maven">
   <info organisation="org.apache.solr" module="core"/>
   

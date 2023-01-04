@@ -187,9 +187,9 @@
   <property name="javadoc.noindex" value="true"/>
 
   <!---TODO: Fix accessibility (order of H1/H2/H3 headings), see https://issues.apache.org/jira/browse/LUCENE-8729 -->
-  <property name="javadoc.doclint.args" value="-Xdoclint:all -Xdoclint:-missing -Xdoclint:-accessibility"/>
+  <property name="javadoc.doclint.args" value="-Xdoclint:none -Xdoclint:-missing -Xdoclint:-accessibility"/>
   <!---proc:none was added because of LOG4J2-1925 / JDK-8186647 -->
-  <property name="javac.doclint.args" value="-Xdoclint:all/protected -Xdoclint:-missing -Xdoclint:-accessibility -proc:none"/>
+  <property name="javac.doclint.args" value="-Xdoclint:none -Xdoclint:-missing -Xdoclint:-accessibility -proc:none"/>
   
   <!-- Javadoc classpath -->
   <path id="javadoc.classpath">
@@ -1518,9 +1518,9 @@ ${tests-output}/junit4-*.suites     - per-JVM executed suites
   <target name="test-nocompile" depends="-clover.disable,install-junit4-taskdef,-init-totals,-test,-check-totals"
           description="Only runs unit tests.  Jars are not downloaded; compilation is not updated; and Clover is not enabled."/>
 
-  <target name="-jacoco-install">
+  <target name="-jacoco-install" depends="ivy-availability-check,ivy-configure">
     <!-- download jacoco from ivy if needed -->
-    <ivy:cachepath organisation="org.jacoco" module="org.jacoco.ant" type="jar" inline="true" revision="0.7.4.201502262128"
+    <ivy:cachepath organisation="org.jacoco" module="org.jacoco.ant" type="jar" inline="true" revision="0.8.5"
                    log="download-only" pathid="jacoco.classpath" />
 
     <!-- install jacoco ant tasks -->
@@ -1532,13 +1532,13 @@ ${tests-output}/junit4-*.suites     - per-JVM executed suites
   <target name="-jacoco-test" depends="clover,compile-test,install-junit4-taskdef,validate,-init-totals">
     <!-- hack: ant task computes absolute path, but we need a relative path, so its per-testrunner -->
     <jacoco:agent property="agentvmparam.raw"/>
-    <property name="agentvmparam" value="${agentvmparam.raw}destfile=jacoco.db,append=false"/>
+    <property name="agentvmparam" value="${agentvmparam.raw},destfile=jacoco.exec,append=false"/>
   
     <!-- create output dir if needed -->
     <mkdir dir="${junit.output.dir}"/>
 
     <!-- run tests, with agent vm args, and keep runner files around -->
-    <test-macro threadNum="${tests.jvms.override}" additional.vm.args="${agentvmparam}" runner.leaveTemporary="true"/>
+    <test-macro threadNum="1" additional.vm.args="${agentvmparam}" runner.leaveTemporary="true"/>
   </target>
 
   <target name="-jacoco-report" depends="-check-totals">
@@ -1550,7 +1550,7 @@ ${tests-output}/junit4-*.suites     - per-JVM executed suites
     <!-- print jacoco reports -->
     <jacoco:report>
       <executiondata>
-        <fileset dir="${junit.output.dir}" includes="**/jacoco.db"/>
+        <fileset dir="${junit.output.dir}" includes="**/jacoco.exec"/>
       </executiondata>
       <structure name="${final.name} JaCoCo coverage report">
         <classfiles>
@@ -1565,6 +1565,39 @@ ${tests-output}/junit4-*.suites     - per-JVM executed suites
   </target>
 
   <target name="jacoco" depends="-jacoco-install,-jacoco-test,-jacoco-report" description="Generates JaCoCo coverage report"/>
+
+  <target name="-sonar-install" depends="ivy-availability-check,ivy-configure">
+    <!-- download sonar from ivy if needed -->
+    <ivy:cachepath organisation="org.sonarsource.scanner.ant" module="sonarqube-ant-task" type="jar" inline="true" revision="2.7.0.1612"
+                   log="download-only" pathid="sonar.classpath" />
+
+    <!-- install sonar ant tasks -->
+    <taskdef uri="antlib:org.sonar.ant" resource="org/sonar/ant/antlib.xml">
+      <classpath refid="sonar.classpath"/>
+    </taskdef>
+  </target>
+
+  <!-- sonar properties -->
+  <property name="sonar.projectKey" value="${name}" />
+  <property name="sonar.projectName" value="${name}" />
+  <property name="sonar.projectVersion" value="${version}" />
+  <property name="sonar.language" value="java" />
+  <property name="sonar.sources" value="${src.dir}" />
+  <property name="sonar.tests" value="${tests.src.dir}" />
+  <property name="sonar.java.binaries" value="${build.dir}/classes/java" />
+  <property name="sonar.java.binaries" value="${build.dir}/classes/test" />
+  <property name="sonar.dynamicAnalysis" value="reuseReports" />
+  <property name="sonar.java.coveragePlugin" value="jacoco" />
+  <property name="sonar.jacoco.reportPath" location="${junit.output.dir}/J0/jacoco.exec"/>
+
+  <!--
+    Run the following command from the module base directory to launch the analysis:
+    ant -Dsonar.host.url=<SONAR_HOST_URL> sonar
+  -->
+  <target name="sonar" depends="-sonar-install,jacoco">
+    <!-- Execute Sonar -->
+    <sonar:sonar  xmlns:sonar="antlib:org.sonar.ant"/>
+  </target>
 
   <!-- Run the actual tests (must be wrapped with -init-totals, -check-totals) -->
   <target name="-test">

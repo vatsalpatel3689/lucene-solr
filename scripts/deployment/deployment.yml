@@ -1,0 +1,16 @@
+- hosts: [batch0]
+  become: yes
+
+  tasks:
+    - name: update package version
+      shell: sed -i 's/deb\ \[trusted=yes\]\ http\:\/\/10.47.4.220\/repos\/fk-neo-solr\/.*\ \//deb\ \[trusted=yes\]\ http\:\/\/10.47.4.220\/repos\/fk-neo-solr\/<new-version>\ \//g' /etc/apt/sources.list.d/fk-neo-solr.list
+    - name: purge solr
+      shell: apt-get purge --yes --allow-unauthenticated fk-neo-solr    
+    - name: Apt-get update
+      shell: apt-get update
+    - name: Install package
+      shell: apt-get install --yes --allow-unauthenticated fk-neo-solr
+    - name: Stop solr
+      shell: /etc/init.d/fk-neo-solr stop
+    - name: Start solr
+      shell: /etc/init.d/fk-neo-solr start

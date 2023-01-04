@@ -66,7 +66,10 @@ public class DocSlice extends DocSetBase implements DocList {
     // if we didn't store enough (and there was more to store)
     // then we can't take a subset.
     int requestedEnd = offset + len;
-    if (requestedEnd > docs.length && this.matches > docs.length) return null;
+
+    // commenting out this check as in our rescoring use-case, it could be violated normally when matchedDocs > howMany > rescoredDocs.
+    //if (requestedEnd > docs.length && this.matches > docs.length) return null;
+
     int realEndDoc = Math.min(requestedEnd, docs.length);
     int realLen = Math.max(realEndDoc-offset,0);
     if (this.offset == offset && this.len == realLen) return this;

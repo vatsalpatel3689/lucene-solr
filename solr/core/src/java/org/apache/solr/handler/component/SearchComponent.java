@@ -125,6 +125,10 @@ public abstract class SearchComponent implements SolrInfoBean, NamedListInitiali
     return registry;
   }
 
+  public void setMetricRegistry(MetricRegistry metricRegistry) {
+    this.registry = metricRegistry;
+  }
+
   public static final Map<String, Class<? extends SearchComponent>> standard_components;
 
 
